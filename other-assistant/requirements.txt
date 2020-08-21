@@ -1,0 +1,14 @@
+wheel
+PyAudio
+vext
+vext.gi
+playsound
+SpeechRecognition
+wikipedia
+datetime
+requests
+gtts
+selenium
+webdriver_manager
+youtube_search
+dialogflow
