@@ -1,0 +1,12 @@
+{
+    "type": "service_account",
+    "project_id": "canopylab",
+    "private_key_id": "0b5180053160384613d2a598e7673d81ed8b0b46",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDe+mDvGyG3FUNC\nrUqzmQDsAqypUTppny5mCYGPq6pjTY3HfLi7JMa0upCdTW97qS7t8ngIVi/bPeAO\nggmhPRXVrnLqomEpjQBLEZ/OoKq+hsF2VYsxxK9ouHle17zfaFJbwZt5x8EKj6GP\nb/bHLP4xlPnQ404AqQCoJyaAUCZpLvSI04/ph8XHAbH9AIHNQRuiDk2gpMwNtVDf\nCNxH8HWL0LIFosJ9VFVk8GdW1XKIarT73TepUHP17AbzQmssycAdt72INcZTU5Mp\nni1HnU8mgoubDATqnHZr5yjuKjJF3WNEXBQtbWy99rsvZW86Bcfo17RAHH3EKUWa\nCMTeOrDnAgMBAAECggEAUXzCGQ/ayexY2NC4yJrFZfryO6yGQtxcGgkmUqmDSugo\nRLuVTTs67QhzWjFW6SPilS3z5OQOeDqMG/E08LqAtMcckxgFlyhC76xAsUQxMhDQ\nOd04UddV3VjxbhI8oY6f7o16Ms6oAyKLgf6Cera8LMWLaGXxdzdMGKe6H9FqwCws\nqJf2JBjqZ3TOd3xrwhk5YJFgU0em2AeDfst/7N/WIg9Wkj1TXjZv3t9EbvGYGbqP\n2yHHvA6ChsjW78hg+JfudLQWKYUZTVoc5yLYcRrRiVBtFxXvfm6v4FxM+sRgbncs\n3GujP79iJfQiSF3YPMay89dlutNAN8zWqWys6OS0rQKBgQDxwDP1ExSFzcKN/9YW\nmNTHnKdEG4ne5ToMCoJFr6whXpzaBB2R9eYbuh4s/UAyDWNQj9AShO8Fh/6kZpF4\n8CyydMH+R2o6fFr4eX7F1TJ5jhG+Ogncx5XWSZPoGhTXdIKjj+GW3Jmkp1wnds6G\njk9SLuYoBxF1uJr1LIp24N78swKBgQDsHumCadH5Js4WPtad3RzTaVFfT6wsik5e\n5CyPay3bEFqe+xeUvZphIytWIgtO6CoLTubarPP3pd+ZeOMReDAlQl0oDga56Jph\nakpoxzlgTS0tAWBRcdvJho6EvQuhmaISNcu+SG9qa2T0X6yQJqDVi3yV89g2I8Eq\nhy94yVs8/QKBgQCXWaOtvUJN+uHhENix0QD174dwxmTsnUpYG4QvqKn1Qkyk2YrB\nxNdJaJ5XwD2emG8jEsZLsdoK9ndf6a8Nrh/todeKIJ/K+eviP/40USOGooFNPPzL\nslCGlg35c8q0kQbw67VqQ7YVNYomUuU9rH7Qjvgc+z/dGbQ55qbRgjtYrQKBgQCW\no6YQGJjoHpSuZoqfjlh8nB1Y9EiA5f/X1DSFjzhjIQzfjovdzhT20ews+G1EeyOP\nsVfgvSSsozuC+zfKhmYY7zzleAVciAQuEBTGwgtd3/7pTo53h29UI687CiyofY6D\nlaSVkjrapwdyTLOYB7zmYCYsuLQA3lC3ZCWqJrQ5tQKBgQCE7o7l7MooNLJlXRyd\nB/IWnTAsCCsV8uivPAsvzMTfISmtsMPqhJEtSSGTv/T9VOwwW+xfSdWfAAaRoCW4\nb5+H4b0b6WpNfLiJdq/MHuAgx9BfiUQ0ps2eviyoA82QTGFKis3R2w+c6vr/dnr5\nmQh0WpPC/yCyVhyn91/7lEDNSQ==\n-----END PRIVATE KEY-----\n",
+    "client_email": "a1-integration@canopylab.iam.gserviceaccount.com",
+    "client_id": "116713986120839664244",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/a1-integration%40canopylab.iam.gserviceaccount.com"
+  }

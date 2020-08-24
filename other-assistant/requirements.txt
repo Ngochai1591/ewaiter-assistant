@@ -12,3 +12,4 @@ selenium
 webdriver_manager
 youtube_search
 dialogflow
+googletrans

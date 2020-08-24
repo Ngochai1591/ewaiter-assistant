@@ -1,11 +1,13 @@
 
-const slugify = require('slugify')
+const slugify = require('slugify');
+const { NewSurface } = require('actions-on-google');
 
-let foodList = ["caramel", "chà bông cay"];
+let foodList = ["caramel", "cha bong cay"];
+let quantityList = [5, 4];
 let allDishes = [
     {
         "id": 1,
-        "name": "chà bông cay"
+        "name": "Chà Bông Cay"
     }, 
     {
         "id": 2,
@@ -21,45 +23,99 @@ let allDishes = [
     }
 ];
 
-let change_list_object_to_list = (object_list) =>{
-    var newList = [];
-    object_list.forEach((object)=>{
-        console.log(object['name'])
-        var en_name = replace_vietnamese_text(object["name"])
-        newList.push(en_name);
+const change_to_foodList = (allDishes) =>{
+    var foodList = []
+    allDishes.forEach((dish)=>{
+        var newName = remove_vietnamese_sign(dish['name'].toLowerCase())
+        foodList.push(newName)
     });
 
-    return newList;
+    return foodList;
 }
 
-var newFoodList = change_list_object_to_list(allDishes);
+const remove_vietnamese_sign = (vietnameses_text) =>{
+    var newText = slugify(vietnameses_text, {locale: "vi"});
+    newText  = newText.split('-').join(' ');
+    return newText
+}
 
+const isValid = (newFoodList, foodList) =>{
+    return foodList.every((food) => {
+        // console.log(food);
+        return newFoodList.includes(food);
+    });
+}
 
-let isValid = (arr, target) => target.every( v =>  {
-    console.log(v)
-    return arr.includes(v)
-})
-
-let change_foodList_to_en_text = (foodList) =>{
-    // console.log(foodList.length)
-    var newFoodList = []
+const check_invalid_food = (newFoodList, foodList) =>{
+    inValidFoodList = [];
+    validFoodList = [];
     foodList.forEach((food) =>{
-        var newText = replace_vietnamese_text(food);
-        // console.log(newText)
-        newFoodList.push(newText)
+        // console.log(food)
+        if(newFoodList.includes(food)){
+            console.log(`[INFO] ${food} is valid `);
+            validFoodList.push(food);
+        }
+        else{
+            console.log(`[INFO] ${food} is not valid`);
+            inValidFoodList.push(food);
+        }
     });
-    // console.log("NEW FOOD LIST", newFoodList)
-    return newFoodList;
+    return {"inValidFoodList": inValidFoodList, "validFoodList": validFoodList};
 }
 
-const replace_vietnamese_text = (vietnamese_text) =>{
-    var en_text = slugify(vietnamese_text, {locale: 'vi'});
-    en_text = en_text.toLowerCase();
-    en_text = en_text.split('-').join(' ');
-    return en_text
-} 
+const array_to_string = (arr, quantityList) =>{
+    var newString = ""
+    if(quantityList === null){
+        arr.forEach((element, index, array)=>{
+            if(index !== array.length-1){
+                newString += element + ", ";
+            }else{
+                newString += element;
+            }
+        });
+    }
+    else{
+        arr.forEach((element, index, array) =>{
+            if( index !== array.length-1){
+                newString += quantityList[index] + " " + element + ", ";
+            }
+            else{
+                newString += quantityList[index] + " " + element;
+            }
+        })
+    }
+    return newString
+}
 
-var newList = change_foodList_to_en_text(foodList);
-console.log("NEW_LIST", newList)
+const create_order_info = (foodList, quantityList, get_all_order) =>{
+    get_all_order.forEach((foodDetail)=>{
+        // console.log(foodDetail);
+        var newFoodName = remove_vietnamese_sign(foodDetail["name"].toLowerCase())
+        console.log(newFoodList)
+        if(foodList.includes(newFoodName)){
+            console.log("VALID", foodDetail)
+        }
+        else{
+            console.log("INVALID", foodDetail)
+        }
+    })
+}
+
+var newFoodList = change_to_foodList(allDishes);
+console.log("FOOD_LIST", foodList)
 console.log("NEW_FOOD_LIST", newFoodList)
-console.log(isValid(newFoodList, newList));
+
+if(isValid(newFoodList, foodList)){
+    console.log("VALID")
+    var order_arr = array_to_string(foodList, quantityList);
+    console.log(order_arr)
+    var order_info = create_order_info(foodList, quantityList, allDishes);
+}else{
+    console.log("NOT VALID")
+    var foodObject = check_invalid_food(newFoodList, foodList);
+    inValidFoodList = foodObject['inValidFoodList'];
+    validFoodList = foodObject['validFoodList'];
+    console.log("INVALID_FOOD_LIST", inValidFoodList);
+    console.log("VALID_FOOD_LIST", validFoodList)
+}
+

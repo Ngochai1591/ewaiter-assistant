@@ -2,7 +2,7 @@
 
 const slugify = require('slugify')
 
-const API_ENDPOINT = "http://platform.ewaiter.tech";
+const API_ENDPOINT = "http://platform.ewaiter.tech/api";
 
 const DEFAULT_WELCOME_INTENT = "Default Welcome Intent";
 const DEFAULT_FALLBACK_INTENT = "Default Fallback Intent";
@@ -25,7 +25,9 @@ const {
 } = require('dialogflow-fulfillment');
 const functions = require('firebase-functions');
 const axios = require('axios');
-const { Change } = require('firebase-functions');
+const {
+    Change
+} = require('firebase-functions');
 
 
 process.env.DEBUG = 'dialogflow:*'; // It enables lib debugging statements
@@ -84,114 +86,169 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 agent.add(`I'm sorry, you order is not valid, please tell me your order again`);
             } else {
                 //Check order in API
-                let url = API_ENDPOINT + '/api/dishes/'
+                let url = API_ENDPOINT + '/dishes/'
                 let invalid_order_string = "";
                 let order_string = "";
-               
-                let get_all_order = await getDishes(url).then((res)=>{
-                    if(res.data){
+
+                let get_all_order = await getDishes(url).then((res) => {
+                    if (res.data) {
                         console.log("RES.DATA", res.data)
                         return res.data.data.results
-                    }
-                    else{
+                    } else {
                         return null
                     }
-                }).catch((err)=>{
+                }).catch((err) => {
                     console.log("ERROR WHEN GET DISHES ", err);
                     return null
                 });
 
-                if(get_all_order == null){
+                if (get_all_order == null) {
                     //Error when get all dishes
                     agent.add("I'm sorry, something happened ");
-                } 
-                else{
+                } else {
                     //Check order of customer is valid or not
                     //Change foodList to en text
-                    var newFoodList = change_foodList_to_en_text(foodList);
-                    if(isValid(get_all_order, newFoodList) == True){
-                        
-                    }
-                    else{
-                        agent
+                    var newFoodList = change_to_foodList(get_all_order);
+                    if (isValid(newFoodList, foodList)) {
+                        console.log("[INFO] this order is valid");
+                        var validString = array_to_string(foodList, quantityList);
+                        agent.add(`${validString}. Is that all you'll be ordering ?`);
+
+
+
+                        agent.add(new Suggestion('Yes'));
+                        agent.add(new Suggestion('No'));
+                    } else {
+                        console.log('[INFO] this order is invalid');
+                        var foodObject = check_invalid_food(newFoodList, foodList);
+                        var inValidFoodList = foodObject['inValidFoodList'];
+                        var validFoodList = foodObject['validFoodList'];
+                        console.log("INVALID_FOOD_LIST", inValidFoodList);
+                        console.log("VALID_FOOD_LIST", validFoodList)
+                        var invalidString = array_to_string(inValidFoodList, null);
+
+                        agent.add(`I'm sorry, we don't have ${invalidString} in our restaurant, Can you replace with something else?`);
                     }
                 }
 
-        //         console.log("ORDER_DATA", order_data)
-        //         //Checking response data is valid or not
-        //         if(order_data !== null){
-        //             let order_info = order_data['order_info']
-        //             order_info.forEach((food)=>{
-        //                 order_string += food['quantity'] + " "+ food['foodName']+ ", ";
-        //                 if(food['quantity'] === 0){
-        //                     console.log(food)
-        //                     invalid_order_string += food['foodName']+ ", ";
-        //                 }
-        //             });
-        //             console.log("ORDER_INFO", order_info);
-        //             console.log("INVALID_ORDER_STRING", invalid_order_string);
-                    
-        //             //If don't have any invalid food
-        //             if(invalid_order_string !== ""){
-        //                 console.log('[INFO] this is invalid order!')
-        //                 agent.add(`I'm sorry that we don't have ${invalid_order_string} in our restaurant, can you change it please`);
-        //             }
-        //             else{
-        //                 console.log("[INFO] This is valid order!")
-                        
+                //         console.log("ORDER_DATA", order_data)
+                //         //Checking response data is valid or not
+                //         if(order_data !== null){
+                //             let order_info = order_data['order_info']
+                //             order_info.forEach((food)=>{
+                //                 order_string += food['quantity'] + " "+ food['foodName']+ ", ";
+                //                 if(food['quantity'] === 0){
+                //                     console.log(food)
+                //                     invalid_order_string += food['foodName']+ ", ";
+                //                 }
+                //             });
+                //             console.log("ORDER_INFO", order_info);
+                //             console.log("INVALID_ORDER_STRING", invalid_order_string);
 
-        //                 //save to context of dialogflow
-        //                 const order_data = {
-        //                     "name": "orderdata",
-        //                     "lifespan": 60,
-        //                     "parameters": {
-        //                         "order_info": order_info
-        //                     }
-        //                 }
-        //                 agent.setContext(order_data);
-                        
+                //             //If don't have any invalid food
+                //             if(invalid_order_string !== ""){
+                //                 console.log('[INFO] this is invalid order!')
+                //                 agent.add(`I'm sorry that we don't have ${invalid_order_string} in our restaurant, can you change it please`);
+                //             }
+                //             else{
+                //                 console.log("[INFO] This is valid order!")
 
 
-        //                 agent.add(`${order_string}. Is that all you'll be ordering ?`);
-        //                 agent.add(new Suggestion('Yes'));
-        //                 agent.add(new Suggestion('No'));
-        //             }
-        //         }
-        //         else{
-        //                 agent.add("Sorry, something happened !!!")
-        //         }
+                //                 //save to context of dialogflow
+                //                 const order_data = {
+                //                     "name": "orderdata",
+                //                     "lifespan": 60,
+                //                     "parameters": {
+                //                         "order_info": order_info
+                //                     }
+                //                 }
+                //                 agent.setContext(order_data);
+
+
+
+                //                 agent.add(`${order_string}. Is that all you'll be ordering ?`);
+                //                 agent.add(new Suggestion('Yes'));
+                //                 agent.add(new Suggestion('No'));
+                //             }
+                //         }
+                //         else{
+                //                 agent.add("Sorry, something happened !!!")
+                //         }
             }
         }
     }
-    const change_list_object_to_food_list = (object_list) =>{
-        var newList = [];
-        object_list.forEach((object) =>{
-            newList.push(object["name"]);
+
+
+    //oder-intent function
+    const change_to_foodList = (allDishes) => {
+        var foodList = []
+        allDishes.forEach((dish) => {
+            var newName = remove_vietnamese_sign(dish['name'].toLowerCase())
+            foodList.push(newName)
         });
-
-        return newList
+        return foodList;
     }
 
-    const isValid = (orders, foodList) =>{
-        var newList = change_list_object_to_food_list(orders);
-        return foodList.every(foodItem => newList.includes(foodItem));   
-    }
-
-    const change_foodList_to_en_text = (foodList) =>{
-        var newFoodList = []
-        foodList.forEach((food) =>{
-            var newText = replace_vietnamese_text(food);
-            newFoodList.push(newText)
+    const remove_vietnamese_sign = (vietnameses_text) => {
+        var newText = slugify(vietnameses_text, {
+            locale: "vi"
         });
-        return newFoodList;
+        newText = newText.split('-').join(' ');
+        return newText
     }
 
-    const replace_vietnamese_text = (vietnamese_text) =>{
-        var en_text = vietnamese_text.slugify(vietnamese_text, {locale: 'vi'});
-        en_text = en_text.toLowerCase();
-        en_text = en_text.split('-').join(' ');
-        return en_text
-    } 
+    const isValid = (newFoodList, foodList) => {
+        return foodList.every((food) => {
+            // console.log(food);
+            return newFoodList.includes(food);
+        });
+    }
+
+    const check_invalid_food = (newFoodList, foodList) => {
+        inValidFoodList = [];
+        validFoodList = [];
+        foodList.forEach((food) => {
+            // console.log(food)
+            if (newFoodList.includes(food)) {
+                console.log(`[INFO] ${food} is valid `);
+                validFoodList.push(food);
+            } else {
+                console.log(`[INFO] ${food} is not valid`);
+                inValidFoodList.push(food);
+            }
+        });
+        return {
+            "inValidFoodList": inValidFoodList,
+            "validFoodList": validFoodList
+        };
+    }
+
+    const array_to_string = (arr, quantityList) => {
+        var newString = ""
+        if (quantityList === null) {
+            arr.forEach((element, index, array) => {
+                if (index !== array.length - 1) {
+                    newString += element + ", ";
+                } else {
+                    newString += element;
+                }
+            });
+        } else {
+            arr.forEach((element, index, array) => {
+                if (index !== array.length - 1) {
+                    newString += quantityList[index] + " " + element + ", ";
+                } else {
+                    newString += quantityList[index] + " " + element;
+                }
+            })
+        }
+        return newString
+    }
+
+/////
+
+
+
 
     const order_intent_yes = async (agent) => {
         //get data from context
@@ -199,29 +256,27 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         const order = orderdata['order_info']
 
         let url = API_ENDPOINT + '/orderFood';
-        let result = await orderFood(url, order).then((res)=>{
-            if(res.data){
+        let result = await orderFood(url, order).then((res) => {
+            if (res.data) {
                 return res.data;
-            }else{
+            } else {
                 return "ERROR";
             }
-        }).catch((err)=>{
+        }).catch((err) => {
             console.log("ERROR WHEN CALL API", err);
             return "ERROR"
         });
 
-        if(result === "ERROR"){
+        if (result === "ERROR") {
             agent.add(`I'm sorry, something happened`)
-        }
-        else{
-            if(result === "SUCCESS"){
+        } else {
+            if (result === "SUCCESS") {
                 agent.add(`Ok, your order is in processing, please wait for a while`)
-            }
-            else{
+            } else {
                 agent.add(`I'm sorry, your order is canceled`)
             }
         }
-        
+
 
     }
 
@@ -248,22 +303,22 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
 
-   
+
 
 
 
 
 
     //====================OTHER FUNCTION=============================
-    const getItem = (item, agent) =>{
+    const getItem = (item, agent) => {
         const context_data = agent.context.get(item);
         const data = context_data.parameters;
         return data
     }
 
     const validOrder = (order) => {
-        order.forEach((food)=>{
-            if(food['quantity'] === 0){
+        order.forEach((food) => {
+            if (food['quantity'] === 0) {
                 return false;
             }
         });
@@ -279,16 +334,16 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     //=====================API FUNCTION===========================
     const getDishes = (url) => {
         return axios.get(url, {
-            "headers":{
+            "headers": {
                 "Authorization": TOKEN,
                 "Accept": "application/json"
             }
         })
     }
 
-    const orderFood = (url, order) =>{
-        return axios.post(url,{
-            "order":order
+    const orderFood = (url, order) => {
+        return axios.post(url, {
+            "order": order
         });
     }
 
