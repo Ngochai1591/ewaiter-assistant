@@ -13,8 +13,8 @@ const ORDER_INTENT_NO = "Order Intent - no";
 const DEFAULT_WELCOME_INTENT_CUSTOMER_SAY_THEIR_NAME = "Default Welcome Intent - customer say their name";
 
 
-const TOKEN = "Token d1f8cc205105954e4cd95040d6b7fc30a8d09b87";
-
+const TOKEN = "Token 4c9d8c4423f12e4fa0084302b145fd94983001fa";
+const TABLEID = 65;
 // Create an app instance
 const {
     google
@@ -87,9 +87,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             } else {
                 //Check order in API
                 let url = API_ENDPOINT + '/dishes/'
-                let invalid_order_string = "";
-                let order_string = "";
-
                 let get_all_order = await getDishes(url).then((res) => {
                     if (res.data) {
                         console.log("RES.DATA", res.data)
@@ -102,7 +99,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     return null
                 });
 
-                if (get_all_order == null) {
+                if (get_all_order === null) {
                     //Error when get all dishes
                     agent.add("I'm sorry, something happened ");
                 } else {
@@ -114,7 +111,22 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         var validString = array_to_string(foodList, quantityList);
                         agent.add(`${validString}. Is that all you'll be ordering ?`);
 
-
+                        var order_info = create_order_info(foodList, quantityList, get_all_order);
+                        if(order_info){
+                            console.log("ORDER_INFO", order_info);
+                            const order_data = {
+                                "name": "orderdata",
+                                "lifespan": 60,
+                                "parameters": {
+                                    "order_info": order_info
+                                }
+                            }
+                            agent.setContext(order_data);
+                        }
+                        else{
+                            console.log("[ERROR] Error when create order_info");
+                            agent.add("I'm sorry, Something happened");
+                        }
 
                         agent.add(new Suggestion('Yes'));
                         agent.add(new Suggestion('No'));
@@ -205,8 +217,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     }
 
     const check_invalid_food = (newFoodList, foodList) => {
-        inValidFoodList = [];
-        validFoodList = [];
+        var inValidFoodList = [];
+        var validFoodList = [];
         foodList.forEach((food) => {
             // console.log(food)
             if (newFoodList.includes(food)) {
@@ -245,6 +257,46 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         return newString
     }
 
+
+    const create_temp_order = (foodList, quantityList) =>{
+        var tempOrderList = []
+        foodList.forEach((element, index, array)=>{
+            var tempObject = {
+                "name": element, 
+                "quantity": quantityList[index]
+            }
+            tempOrderList.push(tempObject);
+        });
+        return tempOrderList;
+    }
+    
+    const create_order_info = (foodList, quantityList, get_all_order) =>{
+        var tempOrder = create_temp_order(foodList, quantityList);
+        // console.log("TEMP_ORDER", tempOrder);
+        var order_info = []
+        get_all_order.forEach((foodDetail)=>{
+            // console.log(foodDetail);
+            var newFoodName = remove_vietnamese_sign(foodDetail["name"].toLowerCase())
+            // console.log(newFoodList)
+            if(foodList.includes(newFoodName)){
+                console.log("VALID", foodDetail)
+                tempOrder.forEach((order)=>{
+                    if(order['name'] === newFoodName){
+                        // console.log("ORDER", order)
+                        foodDetail["quantity"] = order['quantity'];
+                        // console.log(foodDetail)
+                        order_info.push(foodDetail)
+                    }
+                })
+            }
+            else{
+                console.log("INVALID", foodDetail)
+            }
+        });
+    
+        return order_info
+    }
+    
 /////
 
 
@@ -253,32 +305,48 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     const order_intent_yes = async (agent) => {
         //get data from context
         const orderdata = getItem("orderdata", agent);
-        const order = orderdata['order_info']
+        const order = orderdata['order_info'];
+        let url = API_ENDPOINT + '/orders/';
 
-        let url = API_ENDPOINT + '/orderFood';
-        let result = await orderFood(url, order).then((res) => {
+        const orderList = create_order_list(order)
+
+
+        let result = await orderFood(url, orderList, TABLEID).then((res) => {
             if (res.data) {
                 return res.data;
             } else {
-                return "ERROR";
+                return null;
             }
         }).catch((err) => {
             console.log("ERROR WHEN CALL API", err);
-            return "ERROR"
+            return null
         });
 
-        if (result === "ERROR") {
+        if (result === null) {
             agent.add(`I'm sorry, something happened`)
         } else {
-            if (result === "SUCCESS") {
-                agent.add(`Ok, your order is in processing, please wait for a while`)
-            } else {
-                agent.add(`I'm sorry, your order is canceled`)
-            }
+            agent.add(`Your order is pending, please wait for a while, thanks for using our service`);
         }
-
-
     }
+
+    const create_order_list = (orders) =>{
+        var newOrderList = []
+        orders.forEach((order)=>{
+            // console.log(order)
+            //get id and quantity
+            console.log("ID", order['id']);
+            console.log("QUANTITY", order['quantity']);
+            var orderObject = {};
+            orderObject['dishId'] = order['id']
+            orderObject['quantity'] = order['quantity']
+            newOrderList.push(orderObject)
+        });
+        return newOrderList;
+    }
+
+
+
+
 
     const order_intent_no = (agent) => {
         agent.add("Could you tell me your order again please ?");
@@ -341,10 +409,19 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
         })
     }
 
-    const orderFood = (url, order) => {
-        return axios.post(url, {
-            "order": order
-        });
+    const orderFood = (url, order, tableId) => {
+        var data = {
+            "tableId": tableId,
+            "orderDetails": order
+        };
+        
+        var headers = {
+            "headers": {
+                'Content-Type': 'application/json',
+                'Authorization': TOKEN
+            }
+        };
+        return axios.post(url, data,headers);
     }
 
 
