@@ -13,7 +13,7 @@ const ORDER_INTENT_NO = "Order Intent - no";
 const DEFAULT_WELCOME_INTENT_CUSTOMER_SAY_THEIR_NAME = "Default Welcome Intent - customer say their name";
 
 
-const TOKEN = "Token 4c9d8c4423f12e4fa0084302b145fd94983001fa";
+const TOKEN = "Token f8d4eb1f36fc6eab91af636664496f0fefc50ddf";
 const TABLEID = 65;
 // Create an app instance
 const {
@@ -61,8 +61,9 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     //Order intent
     const order_intent = async (agent) => {
         //Get foodList and quantity list from user input
-        const foodList = agent.contexts[0].parameters['TypeOfFood.original'];
-        const quantityList = agent.contexts[0].parameters['number']
+        var foodList = agent.contexts[0].parameters['TypeOfFood.original'];
+        foodList = format_list(foodList);
+        var quantityList = agent.contexts[0].parameters['number']
         // console.log("CONTEXTS[0] IN ORDER INTENT", agent.contexts[0])
         if (foodList.length !== quantityList.length) {
             agent.add(`I'm sorry, your order is not valid, please tell me your order again`);
@@ -106,6 +107,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                     //Check order of customer is valid or not
                     //Change foodList to en text
                     var newFoodList = change_to_foodList(get_all_order);
+                    // console.log("NEW_FOOD_LIST ", newFoodList)
                     if (isValid(newFoodList, foodList)) {
                         console.log("[INFO] this order is valid");
                         var validString = array_to_string(foodList, quantityList);
@@ -195,10 +197,18 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     const change_to_foodList = (allDishes) => {
         var foodList = []
         allDishes.forEach((dish) => {
-            var newName = remove_vietnamese_sign(dish['name'].toLowerCase())
+            var newName = remove_vietnamese_sign(dish['name'])
             foodList.push(newName)
         });
         return foodList;
+    }
+
+    const format_list = (list) =>{
+        var newFormatList = []
+        list.forEach((item)=>{
+            newFormatList.push(item.toLowerCase())
+        });
+        return newFormatList;
     }
 
     const remove_vietnamese_sign = (vietnameses_text) => {
@@ -206,7 +216,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
             locale: "vi"
         });
         newText = newText.split('-').join(' ');
-        return newText
+        return newText.toLowerCase()
     }
 
     const isValid = (newFoodList, foodList) => {
@@ -272,14 +282,14 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     
     const create_order_info = (foodList, quantityList, get_all_order) =>{
         var tempOrder = create_temp_order(foodList, quantityList);
-        // console.log("TEMP_ORDER", tempOrder);
+        console.log("TEMP_ORDER", tempOrder);
         var order_info = []
         get_all_order.forEach((foodDetail)=>{
             // console.log(foodDetail);
-            var newFoodName = remove_vietnamese_sign(foodDetail["name"].toLowerCase())
+            var newFoodName = remove_vietnamese_sign(foodDetail["name"])
             // console.log(newFoodList)
             if(foodList.includes(newFoodName)){
-                console.log("VALID", foodDetail)
+                // console.log("VALID", foodDetail)
                 tempOrder.forEach((order)=>{
                     if(order['name'] === newFoodName){
                         // console.log("ORDER", order)
@@ -290,7 +300,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                 })
             }
             else{
-                console.log("INVALID", foodDetail)
+                // console.log("INVALID", foodDetail)
             }
         });
     

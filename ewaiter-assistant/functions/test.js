@@ -230,3 +230,214 @@
 // });
 
 // console.log(result)
+
+
+
+const slugify = require('slugify');
+
+const get_all_order = [
+    {
+        "id": 24,
+        "name": "shrimp",
+        "description": null,
+        "vendor": 4,
+        "category": 1,
+        "size": null,
+        "basePrice": null,
+        "isAvailable": true,
+        "avatarUrl": null,
+        "extraOption": null
+    },
+    {
+        "id": 23,
+        "name": "xvbcvb",
+        "description": null,
+        "vendor": 4,
+        "category": 1,
+        "size": null,
+        "basePrice": null,
+        "isAvailable": true,
+        "avatarUrl": null,
+        "extraOption": null
+    },
+    {
+        "id": 22,
+        "name": "aaaa",
+        "description": null,
+        "vendor": 4,
+        "category": 1,
+        "size": null,
+        "basePrice": null,
+        "isAvailable": true,
+        "avatarUrl": null,
+        "extraOption": null
+    },
+    {
+        "id": 21,
+        "name": "a1",
+        "description": null,
+        "vendor": 4,
+        "category": 1,
+        "size": null,
+        "basePrice": null,
+        "isAvailable": true,
+        "avatarUrl": null,
+        "extraOption": null
+    },
+    {
+        "id": 20,
+        "name": "Chà Bông Cay",
+        "description": "Rousong, also known as meat wool, meat floss, pork floss, beef floss, abon, pork sung or yuk sung, is a dried meat product with a light and fluffy texture similar to coarse cotton, originating from China.",
+        "vendor": 4,
+        "category": 1,
+        "size": null,
+        "basePrice": 1.2,
+        "isAvailable": true,
+        "avatarUrl": "https://ewaiter-prod.s3.amazonaws.com/django/cha_bong_cay.jpg",
+        "extraOption": null
+    },
+    {
+        "id": 19,
+        "name": "Caramel",
+        "description": "The recipe is simply a combination of brewed coffee and warmed milk infused with caramel and brown sugar. Top with whipped cream and extra caramel for that coffeehouse look.",
+        "vendor": 4,
+        "category": 1,
+        "size": null,
+        "basePrice": 3.75,
+        "isAvailable": true,
+        "avatarUrl": "https://ewaiter-prod.s3.amazonaws.com/django/caramel.jpg",
+        "extraOption": null
+    },
+    {
+        "id": 18,
+        "name": "Espresso",
+        "description": "Is a coffee-making method of Italian origin, in which a small amount of nearly boiling water is forced under pressure (expressed) through finely-ground coffee beans.",
+        "vendor": 4,
+        "category": 1,
+        "size": null,
+        "basePrice": 1.5,
+        "isAvailable": true,
+        "avatarUrl": "https://ewaiter-prod.s3.amazonaws.com/django/espresso.jpg",
+        "extraOption": null
+    },
+    {
+        "id": 17,
+        "name": "Latte",
+        "description": "Caffe latte is a coffee drink made with espresso and steamed milk. The word comes from the Italian caffè e latte, caffelatte or caffellatte, which means \"coffee & milk\".",
+        "vendor": 4,
+        "category": 1,
+        "size": null,
+        "basePrice": 2.75,
+        "isAvailable": true,
+        "avatarUrl": "https://ewaiter-prod.s3.amazonaws.com/django/latte.jpg",
+        "extraOption": null
+    },
+    {
+        "id": 16,
+        "name": "Mocha",
+        "description": "A caffè mocha, also called mocaccino, is a chocolate-flavoured variant of a caffè latte. Other commonly used spellings are mochaccino and also mochachino. The name is derived from the city of Mocha, Yemen, which was one of the centers of early coffee trade.",
+        "vendor": 4,
+        "category": 1,
+        "size": null,
+        "basePrice": 3.45,
+        "isAvailable": true,
+        "avatarUrl": "https://ewaiter-prod.s3.amazonaws.com/django/mocha.jpg",
+        "extraOption": null
+    },
+    {
+        "id": 15,
+        "name": "Cappuccino",
+        "description": "A cappuccino is an espresso-based coffee drink that originated in Italy, and is traditionally prepared with steamed milk foam. Variations of the drink involve the use of cream instead of milk, using non-dairy milks, and flavoring with cinnamon or chocolate powder.",
+        "vendor": 4,
+        "category": 1,
+        "size": null,
+        "basePrice": 1.72,
+        "isAvailable": true,
+        "avatarUrl": "https://ewaiter-prod.s3.amazonaws.com/django/capuchino.jpg",
+        "extraOption": null
+    }
+]
+
+
+const TEMP_ORDER = [ 
+    { 
+        "name": 'cha bong cay', 
+        "quantity": 1 
+    },
+    {
+        "name": 'latte',
+        "quantity": 2
+    }
+]
+
+const foodList = ['Cha bong cay', 'latte']
+const quantityList = [1,2]
+
+const remove_vietnamese_sign = (vietnameses_text) => {
+    var newText = slugify(vietnameses_text, {
+        locale: "vi"
+    });
+    newText = newText.split('-').join(' ');
+    return newText
+}
+
+const change_to_foodList = (allDishes) => {
+    var foodList = []
+    allDishes.forEach((dish) => {
+        var newName = remove_vietnamese_sign(dish['name'].toLowerCase())
+        foodList.push(newName)
+    });
+    return foodList;
+}
+const isValid = (newFoodList, foodList) => {
+    return foodList.every((food) => {
+        // console.log(food);
+        return newFoodList.includes(food.toLowerCase());
+    });
+}
+
+const create_order_info = (foodList, quantityList, get_all_order) =>{
+    // var tempOrder = create_temp_order(foodList, quantityList);
+    // console.log("TEMP_ORDER", tempOrder);
+    foodList = format_list(foodList)
+    var tempOrder = TEMP_ORDER;
+    var order_info = []
+    get_all_order.forEach((foodDetail)=>{
+        // console.log(foodDetail);
+        var newFoodName = remove_vietnamese_sign(foodDetail["name"].toLowerCase())
+        console.log("NEW_FOOD_NAME",newFoodName)
+        if(foodList.includes(newFoodName)){
+            console.log("VALID", foodDetail["name"])
+            tempOrder.forEach((order)=>{
+                if(order['name'] === newFoodName){
+                    // console.log("ORDER", order)
+                    foodDetail["quantity"] = order['quantity'];
+                    // console.log(foodDetail)
+                    order_info.push(foodDetail)
+                }
+            })
+        }
+        else{
+            // console.log("INVALID", foodDetail["name"])
+        }
+    });
+
+    return order_info
+}
+
+const format_list = (list) =>{
+    var newFormatList = []
+    list.forEach((item)=>{
+        newFormatList.push(item.toLowerCase())
+    });
+    return newFormatList;
+}
+
+var order_info = create_order_info(foodList, quantityList, get_all_order);
+
+console.log(order_info)
+
+
+
+// var newFoodList = change_to_foodList(get_all_order);
+// console.log(newFoodList)
