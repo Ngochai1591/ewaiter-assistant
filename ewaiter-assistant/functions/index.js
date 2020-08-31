@@ -13,8 +13,8 @@ const ORDER_INTENT_NO = "Order Intent - no";
 const DEFAULT_WELCOME_INTENT_CUSTOMER_SAY_THEIR_NAME = "Default Welcome Intent - customer say their name";
 
 
-const TOKEN = "Token f8d4eb1f36fc6eab91af636664496f0fefc50ddf";
-const TABLEID = 65;
+const TOKEN = "Token a1b069a8eae8c855edb82b98830517f356c7a027";
+const TABLEID = 82;
 // Create an app instance
 const {
     google
@@ -144,50 +144,6 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
                         agent.add(`I'm sorry, we don't have ${invalidString} in our restaurant, Can you replace with something else?`);
                     }
                 }
-
-                //         console.log("ORDER_DATA", order_data)
-                //         //Checking response data is valid or not
-                //         if(order_data !== null){
-                //             let order_info = order_data['order_info']
-                //             order_info.forEach((food)=>{
-                //                 order_string += food['quantity'] + " "+ food['foodName']+ ", ";
-                //                 if(food['quantity'] === 0){
-                //                     console.log(food)
-                //                     invalid_order_string += food['foodName']+ ", ";
-                //                 }
-                //             });
-                //             console.log("ORDER_INFO", order_info);
-                //             console.log("INVALID_ORDER_STRING", invalid_order_string);
-
-                //             //If don't have any invalid food
-                //             if(invalid_order_string !== ""){
-                //                 console.log('[INFO] this is invalid order!')
-                //                 agent.add(`I'm sorry that we don't have ${invalid_order_string} in our restaurant, can you change it please`);
-                //             }
-                //             else{
-                //                 console.log("[INFO] This is valid order!")
-
-
-                //                 //save to context of dialogflow
-                //                 const order_data = {
-                //                     "name": "orderdata",
-                //                     "lifespan": 60,
-                //                     "parameters": {
-                //                         "order_info": order_info
-                //                     }
-                //                 }
-                //                 agent.setContext(order_data);
-
-
-
-                //                 agent.add(`${order_string}. Is that all you'll be ordering ?`);
-                //                 agent.add(new Suggestion('Yes'));
-                //                 agent.add(new Suggestion('No'));
-                //             }
-                //         }
-                //         else{
-                //                 agent.add("Sorry, something happened !!!")
-                //         }
             }
         }
     }
